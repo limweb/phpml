@@ -7,19 +7,11 @@
  *swoole\server(tcpip/udp)-->Http(web)->websocker
  */
 // use swoole_websocket_server as SwooleWebSocketServer;
-require_once __DIR__ . '/vendor/autoload.php';
-use Illuminate\Database\Capsule\Manager as Capsule;
-use SwooleTW\Http\Coroutine\MySqlConnection;
-use SwooleTW\Http\Coroutine\Connectors\ConnectorFactory;
-use SwooleTW\Http\Helpers\FW;
-
-
 use swoole_websocket_server as SwooleWebSocketServer;
 
 class HttpServer
 {
     public $serv;
-    public $db;
     protected $router = [];
     protected $port = 80;
     private $count = 0;
@@ -59,7 +51,6 @@ class HttpServer
                 ],
             ]);
         $this->serv = $serv;
-        $this->eloquent();
     }
 
     //route
@@ -201,13 +192,8 @@ class HttpServer
 
     public function onRequest($request, $response)
     {
-        $s = microtime(true);
-
-        $rs = Capsule::connection('mysql-coroutine')->select('select * from test');
-        var_dump($rs);
         $count = $this->count++;
         $request->serv = $this->serv;
-        $request->s = $s;
         /*----comment--------------------
         // echo __FUNCTION__, PHP_EOL;
         //------------- เรื่องเวลา------------------
@@ -427,62 +413,11 @@ class HttpServer
                     break;
             }
             $rs = $obj();
-
-            echo 'use ' . (microtime(true) - $req->s) . ' s', PHP_EOL;
             $rsp->end($rs);
         } else {
             $rsp->status(404);
             $rsp->end('404');
         }
-    }
-
-
-    protected function getNewMySqlConnection(array $config, string $connection = null)
-    {
-        if ($connection && isset($config[$connection])) {
-            $config = array_merge($config, $config[$connection]);
-        }
-        return ConnectorFactory::make(5.7)->connect($config);
-    }
-
-    private function eloquent()
-    {
-
-        $capsule = new Capsule;
-        $capsule->getDatabaseManager()->extend('mysql-coroutine', function ($config, $name) {
-            
-            echo '----test---';
-            $config['name'] = $name;
-            $connection = new MySqlConnection(
-                $this->getNewMySqlConnection($config, 'write'),
-                $config['database'],
-                $config['prefix'],
-                $config
-            );
-            if (isset($config['read'])) {
-                $connection->setReadPdo($this->getNewMySqlConnection($config, 'read'));
-            }
-            return $connection;
-        });
-
-        $config = [
-            'driver' => 'mysql-coroutine',
-            'host' => '127.0.0.1',
-            'port' => '3306',
-            'database' => 'dbname',
-            'username' => 'dbuser',
-            'password' => 'dbpass',
-            'charset' => 'utf8',
-            'collation' => 'utf8_unicode_ci',
-            'prefix' => '',
-            'strict' => false,
-        ];
-
-        // $capsule->addConnection($config, 'default');
-        $capsule->addConnection($config, 'mysql-coroutine');
-        $capsule->setAsGlobal();
-        $capsule->bootEloquent();
-        $this->db = $capsule;
     }
 
     private function getStaticFile(
@@ -598,9 +533,7 @@ class FooController
 
     public function testmysql()
     {
-        // $mysql = new Swoole\Coroutine\MySQL();
-        echo Swoole\Coroutine::getuid(), PHP_EOL;
-        $mysql = new Co\MySQL;
+        $mysql = new Swoole\Coroutine\MySQL();
         $mysql->connect($this->req->serv->setting['mysql']);
         $mysql->setDefer();
         // $mysql->query('select sleep(1)');

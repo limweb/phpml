@@ -21,7 +21,8 @@
         "php-curl-class/php-curl-class": "^7.4",
         "eoghanobrien/php-simple-mail": "^1.7",
         "vlucas/phpdotenv": "~2.2",
-        "servit/swooleframework": "dev-master"
+        "servit/swooleframework": "dev-master",
+        "swooletw/laravel-swoole": "dev-master"
     },
     "scripts": {
         "post-root-package-install": [
