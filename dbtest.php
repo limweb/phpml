@@ -1,7 +1,7 @@
 <?php
-$dsn = "mysql:host=172.25.0.4;dbname=faces";
+$dsn = "mysql:host=facedb;dbname=faces";
 $user = "root";
-$passwd = "";
+$passwd = "dbroot";
 
 $pdo = new PDO($dsn, $user, $passwd);
 

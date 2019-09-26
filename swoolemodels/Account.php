@@ -2,5 +2,5 @@
 
 class Account extends \SwooleEloquent\Model
 {
-    protected $table = 'lots';
+    protected $table = 'faces';
 }

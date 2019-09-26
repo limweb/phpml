@@ -16,7 +16,7 @@ services:
       - faceml-backend
 
   facedb:
-    image: "mariadb:10.4.4"
+    image: "bitnami/mariadb:latest"
     container_name: facedb
     hostname: facedb
     restart: "always"
@@ -29,6 +29,11 @@ services:
       MYSQL_DATABASE: faces
       MYSQL_USER: dbuser
       MYSQL_PASSWORD: dbpass
+      MARIADB_ROOT_PASSWORD: dbroot
+      MARIADB_USER: dbuser
+      MARIADB_PASSWORD: dbpass
+      MARIADB_DATABASE: faces
+      MARIADB_ROOT_HOST: "%"
     volumes:
       - faceml-data:/var/lib/mysql:rw
       - ./faces.sql:/docker-entrypoint-initdb.d/init.sql

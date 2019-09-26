@@ -3,5 +3,5 @@ use \SwooleEloquent\Model as Model;
 
 class Test extends Model
 {
-    protected $table = 'rounds';
+    protected $table = 'imports';
 }

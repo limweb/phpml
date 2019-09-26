@@ -24,6 +24,8 @@ class HttpServer
         'jpg' => 'image/jpg',
         'jpeg' => 'image/jpg',
         'mp4' => 'video/mp4',
+        'stream'=>'application/octet-stream',
+        'json'=>'application/json',
     ];
     protected $swooledbconfig = [];
 
@@ -191,12 +193,17 @@ class HttpServer
         // $date_time = date("Y-m-d H:i:s");
         // //投递一个异步的任务
         // $d = $this->http->taskwait($post, 200);
-        if ($this->getStaticFile($request, $response, $this->static)) {
-            return;
-        }
         if ($request->server["path_info"] == "/favicon.ico") {
             return;
         }
+        
+        if ($this->getStaticFile($request, $response, $this->static)) {
+            return;
+        }
+        if( file_exists(__DIR__.'/views/'.$request->server["path_info"])){
+            return;
+        } 
+
         $this->restserver->handle($request, $response, $this->http, $this->swooledbconfig);
 
         $response->header("Cache-Control", "no-cache, must-revalidate");
@@ -230,11 +237,16 @@ class HttpServer
         swoole_http_response $response,
         array $static
     ): bool {
-        $staticFile = __DIR__ . $request->server['request_uri'];
+        $staticFile = __DIR__ .'/views/'. $request->server['request_uri'];
         if (!file_exists($staticFile)) {
             return false;
         }
         $type = pathinfo($staticFile, PATHINFO_EXTENSION);
+
+        if(!$type && file_exists($staticFile)){
+            $type = 'stream';
+        }
+
         if (!isset($static[$type])) {
             return false;
         }
