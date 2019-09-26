@@ -166,6 +166,7 @@ class HttpServer
 
     public function onRequest($request, $response)
     {
+
         // \SwooleEloquent\Db::init($this->swooledbconfig);
         // $this->swooledb = new \SwooleEloquent\Db();
         // $accs = swooleEloquent\Db::table('rounds')->limit(112)->get();
@@ -197,6 +198,7 @@ class HttpServer
             return;
         }
         $this->restserver->handle($request, $response, $this->http, $this->swooledbconfig);
+
         $response->header("Cache-Control", "no-cache, must-revalidate");
         $response->header("Expires", "0");
         $response->header('Content-Type', $this->restserver->format);

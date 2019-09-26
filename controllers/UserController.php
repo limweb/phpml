@@ -1,7 +1,7 @@
 <?php
 
 use Servit\Restsrv\RestServer\RestController;
-
+use	Illuminate\Database\Capsule\Manager as Capsule;
 //----------------------------------------------
 //FILE NAME:  UserController.php gen for Servit Framework Controller
 //DATE:                 2019-01-20(Sun)  14:22:59
@@ -20,6 +20,8 @@ class UserController extends RestController
      */
     public function index()
     {
+        $rs = Capsule::table('faces')->limit(2)->get();
+        // dump($rs);
         // ob_start();
         // echo 'routes:';
         // dump($this->server->routes());
@@ -34,11 +36,12 @@ class UserController extends RestController
         // $result = ob_get_contents();
         // ob_end_clean();
         $result = '<h1>OK222</h1>';
-        $rs = $this->swooledb->table('rounds')->get();
-        // return $rs;
-        $test = Test::get();
-        $lots = Lot::get();
-        return [$result, $lots, $rs, $test];
+        // $rs = $this->swooledb->table('rounds')->get();
+        // // return $rs;
+        // $test = Test::get();
+        // $lots = Lot::get();
+        // return [$result, $lots, $rs, $test];
+        return [$result,$rs];
         // $this->response->end($result);
 
     }
