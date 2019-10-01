@@ -1,5 +1,5 @@
 <?php
 $server->addClass('IndexController', '/api/v1', '');
-$server->addClass('UserController', '/', '');
+$server->addClass('UserController', '/user', '');
 $server->addClass('IdxController', '/', '');
-$server->addClass('ModelController', '/models', '');
+$server->addClass('FaceController', '/api', '');

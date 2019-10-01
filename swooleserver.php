@@ -57,15 +57,22 @@ class HttpServer
                 'open_cpu_affinity' => 4, //CPU亲和设置
                 'daemonize' => false, //守护进程化
                 'max_request' => 100000000, //进程的最大任务数
+                'max_package_length' => 200000000,
                 'task_worker_num' => 20, //Task进程的数量
                 'log_file' => APP . '/log.log', //swoole错误日志文件
                 'backlog' => 1024, //Listen队列长度
                 'log_level' => 0, //0 => DEBUG (all) 1  =>TRACE  2  =>INFO 3  =>NOTICE  4  =>WARNING 5  =>ERROR
                 'dbconfig' => $this->swooledbconfig,
+                // 'http_parse_post' => false,
                 'document_root' => __DIR__ . '/views',
+                'upload_tmp_dir'=> __DIR__.'/upload_tmp',
                 'enable_static_handler' => true,
             )
         );
+        // $http->faces =json_decode(file_get_contents(__DIR__.'/faces.json'));
+        $http->faces =[];
+        $http->male =[];
+        $http->female =[];
         $this->http = $http;
     }
 
@@ -193,19 +200,18 @@ class HttpServer
         // $date_time = date("Y-m-d H:i:s");
         // //投递一个异步的任务
         // $d = $this->http->taskwait($post, 200);
-        if ($request->server["path_info"] == "/favicon.ico") {
-            return;
-        }
         
         if ($this->getStaticFile($request, $response, $this->static)) {
+            return;
+        }
+
+        if ($request->server["path_info"] == "/favicon.ico") {
             return;
         }
         if( file_exists(__DIR__.'/views/'.$request->server["path_info"])){
             return;
         } 
-
         $this->restserver->handle($request, $response, $this->http, $this->swooledbconfig);
-
         $response->header("Cache-Control", "no-cache, must-revalidate");
         $response->header("Expires", "0");
         $response->header('Content-Type', $this->restserver->format);

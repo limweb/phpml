@@ -1,0 +1,73 @@
+version: '3'
+
+services:
+  nginx-proxy:
+    image: jwilder/nginx-proxy:alpine
+    container_name: eventpass-nginx-proxy
+    environment:
+       ENABLE_IPV6: 'true'
+       DEFAULT_HOST: 'www.eventpass.co'
+    ports:
+      - '80:80'
+      - '443:443'
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+      - /etc/nginx/certs:/etc/nginx/certs
+      - /etc/nginx/vhost.d:/etc/nginx/vhost.d
+      - /etc/nginx/dhparam:/etc/nginx/dhparam
+
+  eventpass-web:
+    image: nginx:alpine
+    container_name: eventpass-web
+    expose:
+      - 80
+    volumes:
+      - /var/www/html/web/eventpass-web:/var/www/html/web
+      - /var/www/html/web/nginx-eventpass-web.conf:/etc/nginx/nginx.conf
+    environment:
+      VIRTUAL_HOST: 'www.eventpass.co'
+
+  eventpass-cms:
+    image: richarvey/nginx-php-fpm
+    container_name: eventpass-cms
+    expose:
+      - 80
+    volumes:
+      - /var/www/html/web/eventpass-cms:/var/www/html
+    environment:
+      VIRTUAL_HOST: 'cms.eventpass.co'
+
+  eventpass-services:
+    image: richarvey/nginx-php-fpm
+    container_name: eventpass-services
+    expose:
+      - 80
+    volumes:
+      - /var/www/html/api:/var/www/html
+    environment:
+      VIRTUAL_HOST: 'services.eventpass.co'
+  
+  poskar:
+    image: richarvey/nginx-php-fpm
+    container_name: poskar
+    expose:
+      - 80
+    volumes:
+      - /var/www/html/web/poskar:/var/www/html
+    environment:
+      VIRTUAL_HOST: 'poskar.eventpass.co'
+
+  poskar-net:
+    image: richarvey/nginx-php-fpm
+    container_name: poskar-net
+    expose:
+      - 80
+    volumes:
+      - /var/www/html/web/poskar.net:/var/www/html
+    environment:
+      VIRTUAL_HOST: 'poskar.net,www.poskar.net'
+
+networks:
+    default:
+        external:
+            name: eventpass-net

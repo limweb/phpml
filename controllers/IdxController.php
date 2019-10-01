@@ -70,11 +70,47 @@ public function face1(){
             <video id="video" width="620" height="560" autoplay muted></video>
     </body>
     </html>';
+    // $this->http->faces = Face::get();
+    $this->http->male = Face::whereGender('male')->get();
+    $this->http->female = Face::whereGender('female')->get();
+    // dump($this->http->faces);
     return $html;
 }
 
 
+/**
+*@noAuth
+*@url GET /import
+*----------------------------------------------
+*FILE NAME:  IdxController.php gen for Servit Framework Controller
+*DATE:  2019-09-27(Fri)  15:27:54 
 
+*----------------------------------------------
+*/
+public function import(){
+    $html = '
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <div id="container" style="width:80%;margin: 20 0 0 20;" >
+    <form action="/api/imports" method="post" enctype="multipart/form-data" >
+        <div class="form-group">
+          <label for="description">Description</label>
+          <input type="text" name="description" id="description" class="form-control" placeholder="Description" aria-describedby="desctxthelp">
+          <small id="desctxthelp" class="text-muted">Description</small>
+        </div>
+        <div class="form-group">
+          <label for="fileimport">Files</label>
+          <input type="file" name="fileimport" id="fileimport" class="form-control" placeholder="import.json" aria-describedby="fimporthelp">
+          <small id="fimporthelp" class="text-muted">file imports.json</small>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </form>
+    </div>
+    ';
+    return $html;
+}
 
 }
 

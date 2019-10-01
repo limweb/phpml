@@ -10,6 +10,8 @@ services:
     restart: always
     container_name: trainer
     command: "npx pm2-runtime start test3.js -n trainer -i 5"
+    ports:
+      - "8000:8000"
     labels:
       com.docker.compose.project: "trainer"
     networks:
@@ -21,14 +23,9 @@ services:
     hostname: facedb
     restart: "always"
     ports:
-      - "3306:3306"
+      - "3309:3306"
     environment:
       TZ: Asia/Bangkok
-      MYSQL_ROOT_HOST: "%"
-      MYSQL_ROOT_PASSWORD: dbroot
-      MYSQL_DATABASE: faces
-      MYSQL_USER: dbuser
-      MYSQL_PASSWORD: dbpass
       MARIADB_ROOT_PASSWORD: dbroot
       MARIADB_USER: dbuser
       MARIADB_PASSWORD: dbpass

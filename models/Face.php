@@ -15,5 +15,12 @@ class Face extends Model
         protected	$primaryKey='id';
         protected	$keyType = 'string';
         public	$timestamps = true;
-        protected	$dateFormat = 'U';
+
+        //integer, real, float, double, string, boolean, object, array, collection, date and datetime.
+        //restcast snippet
+        protected $casts = [
+                'descriptor' => 'array',
+        ];
+
 } 
+

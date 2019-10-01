@@ -22,7 +22,8 @@ Promise.all([
   faceapi.nets.tinyFaceDetector.loadFromUri('/models'),
   faceapi.nets.faceLandmark68Net.loadFromUri('/models'),
   faceapi.nets.faceRecognitionNet.loadFromUri('/models'),
-  faceapi.nets.faceExpressionNet.loadFromUri('/models')
+  faceapi.nets.faceExpressionNet.loadFromUri('/models'),
+  faceapi.nets.ageGenderNet.loadFromUri('/models')
 ]).then(startVideo)
 
 function getJson() {
@@ -39,6 +40,13 @@ function getJson() {
 getJson();
 
 function startVideo() {
+  // navigator.mediaDevices. getUserMedia({
+  //      audio: false,
+  //      video: true
+  //    })
+  //    .then(stream => video.srcObject = stream)
+  //    .catch(err => console.error(err));
+
   navigator.getUserMedia(
     { video: {} },
     stream => video.srcObject = stream,
@@ -93,25 +101,28 @@ video.addEventListener('play', () => {
   setInterval(async () => {
     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
+      .withAgeAndGender()
       .withFaceDescriptors();
-    console.log('-------Interval----'+ inttime +'-----', detections);
+    // console.log('-------Interval----'+ inttime +'-----', detections);
+
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
     if(detections.length > 0 ){
       await detections.map(async (detection, i) => {
+        console.log('gender---->',detections[0].gender);    
+        // console.log('gender---->',detections[0].descriptor);    
         // console.log('---detection---', i, detection);
-        if (detection.descriptor) {
-            getFaces(detection, canvas);
-        } else {
-          const box = detection.detection.box;
-          const drawBox = new faceapi.draw.DrawBox(box, { label: 'unknow' });
-          drawBox.draw(canvas);
-        }
+          // const box = detection.detection.box;
+          // const drawBox = new faceapi.draw.DrawBox(box, { label: 'unknow '+detection.gender });
+          // drawBox.draw(canvas);
+          if (detection.descriptor) {
+              getFaces(detection, canvas);
+          } else {
+            const box = detection.detection.box;
+            const drawBox = new faceapi.draw.DrawBox(box, { label: 'unknow'+ ' '+detection.gender });
+            drawBox.draw(canvas);
+          }
       })
-    } else {
-        const box = detection.detection.box;
-        const drawBox = new faceapi.draw.DrawBox(box, { label: 'unknow' });
-        drawBox.draw(canvas);
-    }
+    } 
 
     // const resizedDetections = faceapi.resizeResults(detections, displaySize)
     // canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
@@ -164,10 +175,11 @@ async function getFaces(detection, canvas) {
   canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
   // console.log('-----canvas width and height----', canvas.width, canvas.height);
   let queryFace = detection.descriptor;
-  axios.post('/test', JSON.stringify({ queryFace })).then(rs => {
-      // console.log('--------------------rs---------->', rs.data.name);
+  let gender = detection.gender;
+  axios.post('/api/testface',{ queryFace, gender } ).then(rs => {
+      console.log('--------------------rs---------->', rs );
       const box = detection.detection.box;
-      const drawBox = new faceapi.draw.DrawBox(box, { label: rs.data.name });
+      const drawBox = new faceapi.draw.DrawBox(box, { label: (rs.data[0].name?rs.data[0].name:'unknown') +' '+ gender });
       drawBox.draw(canvas);
   }).catch(console.log);
 }
