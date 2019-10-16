@@ -184,13 +184,15 @@ class HttpServer
         }
         if(!isset($this->http->male)){
             $this->http->male = [];
-            $redis->set('male', Face::where('gender','male')->get()->toJson());
+            $male = Face::where('gender','male')->get();
+            $redis->set('male',json_encode($male));
             // $male =  json_decode($this->http->redis->get('male'));
             // dump('----male---',count($male));
         }
         if(!isset($this->http->female)){
             $this->http->female =[];
-            $redis->set('female', Face::where('gender','female')->get()->toJson());
+            $female = Face::where('gender','female')->get();
+            $redis->set('female', json_encode($female));
             // $female =  json_decode($this->http->redis->get('female'));
             // dump('----female---',count($female));
         }
