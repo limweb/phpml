@@ -93,6 +93,7 @@ volumes:
 
 networks:
   default:
+    driver: bridge
     external:
       name: faceml-frontend
   faceml-backend:
