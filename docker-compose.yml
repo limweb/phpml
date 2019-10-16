@@ -37,11 +37,38 @@ services:
     networks:
       - faceml-backend
 
+  redis:
+    image: redis
+    container_name: redis
+    restart: "always"
+    command: ["redis-server", "--appendonly", "yes"]
+    expose:
+      - 6379
+    volumes:
+      - redis-data:/data
+    networks:
+      - faceml-backend
+
+  rabbitmq:
+    image: "rabbitmq:3.8.1-beta.1-management"
+    hostname: "rabbitmq"
+    container_name: "rabbitmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    labels:
+      NAME: "rabbitmq"
+    restart: "always"
+    networks:
+      - faceml-backend
+
   faceml:
-    image: "limweb/tlenswoole:v2"
+    image: "limweb/tlenswoole:v3-rabbitmq"
     container_name: faceml
     working_dir: /app/
     restart: "always"
+    # deploy:
+    #   replicas: 3
     ports:
       - "80:80"
     command: "/usr/local/bin/php /app/swooleserver.php"
@@ -51,17 +78,21 @@ services:
       com.docker.compose.project: "faceml"
     depends_on:
       - "facedb"
+      - "redis"
     links:
       - "facedb"
+      - "redis"
+      - "rabbitmq"
     networks:
       - default
       - faceml-backend
+
 volumes:
   faceml-data:
+  redis-data:
 
 networks:
   default:
-    driver: bridge
     external:
       name: faceml-frontend
   faceml-backend:

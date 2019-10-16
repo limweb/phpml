@@ -59,7 +59,9 @@ public function face1(){
 
         canvas {
             position: absolute;
-            top:83px;
+            top:63px;
+            width:620px;
+            height:560;
         }
     </style>
     </head>
@@ -71,8 +73,8 @@ public function face1(){
     </body>
     </html>';
     // $this->http->faces = Face::get();
-    $this->http->male = Face::whereGender('male')->get();
-    $this->http->female = Face::whereGender('female')->get();
+    // $this->http->male = Face::whereGender('male')->get();
+    // $this->http->female = Face::whereGender('female')->get();
     // dump($this->http->faces);
     return $html;
 }

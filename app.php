@@ -5,6 +5,13 @@ $dotenv = new Dotenv\Dotenv(__DIR__);
 $dotenv->load();
 require_once __DIR__ . '/init.php';
 require_once __DIR__ . '/configs/config.php';
+if(SWOOLEMODE){
+    $ext = 'swoole';
+    if (!extension_loaded($ext)) {
+        echo 'no extension '.$ext.' loaded!';
+        exit();
+    }
+} 
 require_once __DIR__ . '/configs/sysmodels.php';
 // $server = new \Servit\Restsrv\RestServer\RestServer($sysconfig, APPMODE); // config = class config and  mode = debug / production see config.php
 $server = new \Servit\Restsrv\RestServer\RestnewServer($sysconfig, APPMODE); // config = class config and  mode = debug / production see config.php

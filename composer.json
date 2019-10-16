@@ -22,7 +22,9 @@
         "eoghanobrien/php-simple-mail": "^1.7",
         "vlucas/phpdotenv": "~2.2",
         "servit/swooleframework": "dev-master",
-        "swooletw/laravel-swoole": "dev-master"
+        "swooletw/laravel-swoole": "dev-master",
+        "illuminate/cache": "5.7.*",
+        "genealabs/laravel-model-caching": "0.4.0"
     },
     "scripts": {
         "post-root-package-install": [

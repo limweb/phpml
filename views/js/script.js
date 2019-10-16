@@ -1,3 +1,6 @@
+// register
+// in-out
+// report
 const video = document.getElementById('video')
 const v = 0;
 let matcher = '';
@@ -92,23 +95,45 @@ setInterval(() => {
 
 
 video.addEventListener('play', () => {
-  let inttime = 400;
+  let inttime = 100;
   const canvas = faceapi.createCanvasFromMedia(video)
   document.body.append(canvas)
   const displaySize = { width: video.width, height: video.height }
   // console.log('----displaySize----', displaySize);
   faceapi.matchDimensions(canvas, displaySize)
+  
   setInterval(async () => {
     const detections = await faceapi.detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
+      .withFaceExpressions()
       .withAgeAndGender()
       .withFaceDescriptors();
     // console.log('-------Interval----'+ inttime +'-----', detections);
 
+    const resizedDetections = faceapi.resizeResults(detections,displaySize);
     canvas.getContext('2d').clearRect(0, 0, canvas.width, canvas.height)
+    faceapi.draw.drawDetections(canvas,resizedDetections);
+    faceapi.draw.drawFaceLandmarks(canvas, resizedDetections)
+    const minProbability = 0.05
+    faceapi.draw.drawFaceExpressions(canvas, resizedDetections, minProbability)
+
     if(detections.length > 0 ){
       await detections.map(async (detection, i) => {
         console.log('gender---->',detections[0].gender);    
+        const box = detection.detection.box;
+        // console.log('box-->',box);
+        // new faceapi.Rect(left,top,width,height)
+        const regionsToExtract = [
+            new faceapi.Rect(box.left,box.top,box.width,box.height)
+        ];
+        detection.faces = await faceapi.extractFaces(video, regionsToExtract);
+        console.log('faces--->',detection.faces);
+        // .then(canvases=>{
+            // console.log('canvases-->',canvases[0].toDataURL());
+            // let data = canvases[0].toDataURL();
+            // console.log('%c ', 'font-size:400px; background:url('+data+') no-repeat;');
+        // }).catch(console.error);
+
         // console.log('gender---->',detections[0].descriptor);    
         // console.log('---detection---', i, detection);
           // const box = detection.detection.box;
@@ -177,7 +202,9 @@ async function getFaces(detection, canvas) {
   let queryFace = detection.descriptor;
   let gender = detection.gender;
   axios.post('/api/testface',{ queryFace, gender } ).then(rs => {
-      console.log('--------------------rs---------->', rs );
+      console.log('--------------------rs---------->', rs ,detection.faces );
+      let data = detection.faces[0].toDataURL();
+      console.log('%c ', 'font-size:400px; background:url('+data+') no-repeat;');
       const box = detection.detection.box;
       const drawBox = new faceapi.draw.DrawBox(box, { label: (rs.data[0].name?rs.data[0].name:'unknown') +' '+ gender });
       drawBox.draw(canvas);

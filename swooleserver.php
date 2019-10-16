@@ -53,12 +53,12 @@ class HttpServer
         $http = new SwooleWebSocketServer($this->bindAddrss, $this->port, SWOOLE_PROCESS);
         $http->set(
             array(
-                'worker_num' => 20, //worker进程数
+                'worker_num' => 4, //worker进程数
                 'open_cpu_affinity' => 4, //CPU亲和设置
                 'daemonize' => false, //守护进程化
-                'max_request' => 100000000, //进程的最大任务数
+                'max_request' => 10000, //进程的最大任务数
                 'max_package_length' => 200000000,
-                'task_worker_num' => 20, //Task进程的数量
+                'task_worker_num' => 4, //Task进程的数量
                 'log_file' => APP . '/log.log', //swoole错误日志文件
                 'backlog' => 1024, //Listen队列长度
                 'log_level' => 0, //0 => DEBUG (all) 1  =>TRACE  2  =>INFO 3  =>NOTICE  4  =>WARNING 5  =>ERROR
@@ -70,9 +70,6 @@ class HttpServer
             )
         );
         // $http->faces =json_decode(file_get_contents(__DIR__.'/faces.json'));
-        $http->faces =[];
-        $http->male =[];
-        $http->female =[];
         $this->http = $http;
     }
 
@@ -176,6 +173,28 @@ class HttpServer
     public function onRequest($request, $response)
     {
 
+        $redis = new Redis();    
+        $redis->pconnect('redis','6379');
+        $this->http->redis = $redis;
+
+        if(!isset($this->http->faces)){
+            $this->http->faces = [];
+            // $this->http->faces = Face::get();
+            // dump('----faces total---',$this->http->faces->count());
+        }
+        if(!isset($this->http->male)){
+            $this->http->male = [];
+            $redis->set('male', Face::where('gender','male')->get()->toJson());
+            // $male =  json_decode($this->http->redis->get('male'));
+            // dump('----male---',count($male));
+        }
+        if(!isset($this->http->female)){
+            $this->http->female =[];
+            $redis->set('female', Face::where('gender','female')->get()->toJson());
+            // $female =  json_decode($this->http->redis->get('female'));
+            // dump('----female---',count($female));
+        }
+
         // \SwooleEloquent\Db::init($this->swooledbconfig);
         // $this->swooledb = new \SwooleEloquent\Db();
         // $accs = swooleEloquent\Db::table('rounds')->limit(112)->get();
@@ -211,6 +230,16 @@ class HttpServer
         if( file_exists(__DIR__.'/views/'.$request->server["path_info"])){
             return;
         } 
+
+        $response->header('Access-Control-Allow-Origin', '*');
+        $response->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
+        $response->header('Access-Control-Allow-Credentials', 'true');
+        $response->header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+        if ($request->server['request_method'] === 'OPTIONS') {
+            $response->status(200);
+            return false;
+        }
+
         $this->restserver->handle($request, $response, $this->http, $this->swooledbconfig);
         $response->header("Cache-Control", "no-cache, must-revalidate");
         $response->header("Expires", "0");
