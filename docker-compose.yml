@@ -70,7 +70,7 @@ services:
     # deploy:
     #   replicas: 3
     environment:
-      - VIRTUAL_HOST: swoole.eventpass.co
+      VIRTUAL_HOST: "swoole.eventpass.co"
     ports:
       - "8999:80"
     command: "/usr/local/bin/php /app/swooleserver.php"
