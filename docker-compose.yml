@@ -4,18 +4,18 @@
 
 version: "3.5"
 services:
-  trainer:
-    image: "limweb/trainer-nodegpu:v1"
-    working_dir: /app/
-    restart: always
-    container_name: trainer
-    command: "npx pm2-runtime start test3.js -n trainer -i 5"
-    ports:
-      - "8000:8000"
-    labels:
-      com.docker.compose.project: "trainer"
-    networks:
-      - faceml-backend
+  # trainer:
+  #   image: "limweb/trainer-nodegpu:v1"
+  #   working_dir: /app/
+  #   restart: always
+  #   container_name: trainer
+  #   command: "npx pm2-runtime start test3.js -n trainer -i 5"
+  #   ports:
+  #     - "8000:8000"
+  #   labels:
+  #     com.docker.compose.project: "trainer"
+  #   networks:
+  #     - faceml-backend
 
   facedb:
     image: "bitnami/mariadb:latest"
@@ -70,7 +70,7 @@ services:
     # deploy:
     #   replicas: 3
     ports:
-      - "80:80"
+      - "8999:80"
     command: "/usr/local/bin/php /app/swooleserver.php"
     volumes:
       - ./:/app/
