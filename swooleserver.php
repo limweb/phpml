@@ -221,7 +221,7 @@ class HttpServer
         // $date_time = date("Y-m-d H:i:s");
         // //投递一个异步的任务
         // $d = $this->http->taskwait($post, 200);
-        
+
         if ($this->getStaticFile($request, $response, $this->static)) {
             return;
         }
@@ -241,7 +241,8 @@ class HttpServer
             $response->status(200);
             return false;
         }
-
+        // dump('request--->',$request);
+        // dump('request- raw-->',$request->rawContent());
         $this->restserver->handle($request, $response, $this->http, $this->swooledbconfig);
         $response->header("Cache-Control", "no-cache, must-revalidate");
         $response->header("Expires", "0");

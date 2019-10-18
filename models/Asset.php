@@ -14,7 +14,7 @@ class Asset extends Model
 {
         protected	$table='assets';
         protected	$primaryKey='id';
-        public	$timestamps = false;
+        public	        $timestamps = false;
         protected	$dateFormat = 'U';
         protected	$guarded = array('id');
 } 

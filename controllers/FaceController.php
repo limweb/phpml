@@ -17,7 +17,7 @@ use \Curl\Curl;
 class FaceController  extends BaseController {
     
     // private $distinc = 0.25;
-    private $distinc = 0.4;
+    private $distinc = 0.3;
 
     /**
     *@noAuth
@@ -31,9 +31,10 @@ class FaceController  extends BaseController {
     public function testface(){
         try {
             // dump('ok',count($this->http->faces));
-            $gender = isset($_POST->gender) ? $_POST->gender : '';
-            dump('--testface---gender-->',$gender);
-            $qryface = isset($_POST->queryFace) ? json_decode(json_encode($_POST->queryFace),true) : '';
+            $input = json_decode($this->request->rawContent());
+            $gender = isset($input->gender) ? $input->gender : '';
+            // dump('--testface---gender-->',$gender);
+            $qryface = isset($input->queryFace) ? json_decode(json_encode($input->queryFace),true) : '';
             $rs = [];
             if($qryface){
                 // dump('count->http->faces:',count($this->http->faces));
@@ -69,6 +70,7 @@ class FaceController  extends BaseController {
 
                 if($gender == 'male'){
                     $male =  json_decode($this->http->redis->get('male'));
+                    // dump('count-male-->',count($male));
                     foreach($male as $k=> $people){ //แยกคน
                             $faces = $people->descriptor; // ข้อมูลหน้า
                             $sum = 0;
@@ -103,6 +105,7 @@ class FaceController  extends BaseController {
 
             }
             $o= new stdClass();
+            // dump('rs-->',$rs);
             if(count($rs)>0){
                 $a = array_values($rs);
                 $min = min($a);
@@ -148,8 +151,9 @@ class FaceController  extends BaseController {
     public function testfaces(){
         try {
             // dump('ok',count($this->http->faces));
-            $gender = isset($_POST->gender) ? $_POST->gender : '';
-            $qryface = isset($_POST->queryFace) ? json_decode(json_encode($_POST->queryFace),true) : '';
+            $input = json_decode($this->request->rawContent());
+            $gender = isset($input->gender) ? $input->gender : '';
+            $qryface = isset($input->queryFace) ? json_decode(json_encode($input->queryFace),true) : '';
             $rs = [];
             // return Face::get();
             if($qryface){
@@ -186,7 +190,7 @@ class FaceController  extends BaseController {
                 $distinc = $this->distinc;
                 if($gender == 'male'){
                     $male =  json_decode($this->http->redis->get('male'));
-                    dump('---count of male---',count($male));
+                    // dump('---count of male---',count($male));
                     // $male = Face::where('gender','male')->get();
                     foreach($male as $k=> $people){ //แยกคน
                             $faces = $people->descriptor; // ข้อมูลหน้า
@@ -206,7 +210,7 @@ class FaceController  extends BaseController {
 
                 if($gender == 'female'){
                     $female =  json_decode($this->http->redis->get('femail'));
-                    dump('---count of female---',count($female));
+                    // dump('---count of female---',count($female));
                     // $female = Face::where('gender','female')->get();
                    foreach($female as $k=> $people){ //แยกคน
                         $faces = $people->descriptor; // ข้อมูลหน้า
@@ -258,7 +262,7 @@ class FaceController  extends BaseController {
             //     $o->id = '';
             //     $o->idx = '';
             // }
-            dump('---results----',count($rs));
+            // dump('---results----',count($rs));
             return $rs;
         } catch (Exception $e) {
             return[
@@ -440,7 +444,7 @@ class FaceController  extends BaseController {
     public function addmember(){
         try {
             
-            $member = $_POST;
+            $member = json_decode($this->request->rawContent());
             $gender = $member->gender;
             $qryface = $member->queryFace;
             $user = $member->user;
@@ -464,8 +468,11 @@ class FaceController  extends BaseController {
             $rs = $f->save();
             $redis = new Redis();    
             $redis->pconnect('redis','6379');
-            $redis->set('male', Face::where('gender','male')->get()->toJson());
-            $redis->set('female', Face::where('gender','female')->get()->toJson());
+            $male = Face::where('gender','male')->get();
+            $redis->set('male',json_encode($male));
+            $female = Face::where('gender','female')->get();
+            $redis->set('female',json_encode($female));
+
             return [
                 'status' => $status,
                 'success'=> $rs,
@@ -547,14 +554,15 @@ class FaceController  extends BaseController {
     */
     public function addmemassets(){
         try {
-            $member = $_POST;
-            $asset = new Asset();
+            $member = json_decode($this->request->rawContent());
+            // dump('---member--',$member);
             // {"gender":"male","name":"dusit_korpajarasoontorn","distinc":0_3719635906401922,"id":"10118","idx":5806,"access":1,"created_at":1571139351242,"updated_at":1571139351242}: ""
-            $asset->gender = $member->gender;
+            $asset = new Asset();
             $asset->name = $member->name;
-            $asset->created_at = $member->created_at;
-            $asset->updated_at = $member->updated_at;
+            $asset->gender = $member->gender;
             $asset->acces = $member->access;
+            $asset->created_at = date('Y-m-d H:i:s',$member->created_at/1000 );
+            $asset->updated_at = date('Y-m-d H:i:s', $member->updated_at/1000);
             $asset->save();
             return [
                 'member' => $member,
